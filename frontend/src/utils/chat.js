@@ -11,6 +11,7 @@ export const getChatById = async (id) => {
 };
 
 export const getAllChats = async () => {
+    // get username
   try {
     const response = await axios.get("http://127.0.0.1:5000/chats/");
     console.log("response  ", response);
@@ -21,6 +22,7 @@ export const getAllChats = async () => {
 };
 
 export const getAllMessagesById = async (id) => {
+    // get agent name
   try {
     const response = await axios.get("http://127.0.0.1:5000/chats/" + id + "/messages");
     console.log("response  ", response);
@@ -30,14 +32,14 @@ export const getAllMessagesById = async (id) => {
   }
 };
 
-export const sendMessage = async (senderType, senderId, chatId, messages) => {
+export const sendMessage = async (senderType, senderId, chatId, message) => {
   try {
     const response = await axios
-      .post("http://127.0.0.1:5000/chats/" + id + "/messages", {
+      .post("http://127.0.0.1:5000/chats/" + chatId + "/messages", {
         senderType: senderType,
         senderId: senderId,
         chatId: chatId,
-        messages: messages,
+        message: message,
       })
       .then(function (response) {
         return response.data;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Login from "./components/Login";
 import UserChat from "./components/UserChat";
-import AgentChat from "./components/AgentChat";
+import AgentDashboard from "./components/AgentDashboard";
 
 function App() {
   const [user, setUser] = useState({});
@@ -17,7 +17,11 @@ function App() {
   return (
     <div className="App">
       {(Object.keys(user).length === 0 && <Login setUser={setUser} setUserType={setUserType} />) ||
-        (userType == "user" ? <UserChat /> : <AgentChat />)}
+        (userType == "user" ? (
+          <UserChat user={user} userType={userType} setUser={setUser} setUserType={setUserType} />
+        ) : (
+          <AgentDashboard user={user} userType={userType} setUser={setUser} setUserType={setUserType} />
+        ))}
     </div>
   );
 }
