@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sendMessage, getAllMessagesById, getAllChats } from "../utils/chat";
+import { sendMessage, getAllMessagesById, getAllChats, updateChatById } from "../utils/chat";
 
 function AgentDashboard(props) {
   const [currentChatId, setCurrentChatId] = useState("");
@@ -75,6 +75,16 @@ function AgentChatList(props) {
           >
             <h1>Unassigned</h1>
           </button>
+          <button
+            onClick={() => {
+              setChatType("assigned");
+            }}
+            className={`px-4 py-3 text-center font-sans text-md font-bold grow  ${
+              chatType === "assigned" ? "border-b-4 border-[#1CFEBA]" : "border-b border-[#1CFEBA]"
+            }`}
+          >
+            <h1>Assigned</h1>
+          </button>
         </div>
         {/* --------------------------------------  ---------------------------------  */}
         <div className="grow px-4 pt-4 overflow-auto">
@@ -82,11 +92,13 @@ function AgentChatList(props) {
             {chats
               .filter((e) => {
                 if (chatType === "mychats") return e.assignedTo === props.user.id;
-                else return !(e.assigned && e.assigned === true);
+                else if (chatType === "unassigned") return !(e.assigned && e.assigned === true);
+                else return e.assigned && e.assignedTo !== props.user.id;
               })
               .map((chatObj, index) => {
                 return (
                   <ChatTile
+                    user={props.user}
                     currentChatId={props.currentChatId}
                     setCurrentChatId={props.setCurrentChatId}
                     key={index}
@@ -113,6 +125,7 @@ function AgentChat(props) {
   async function getMessages() {
     console.log(props.currentChatId);
     var messageArray = await getAllMessagesById(props.currentChatId);
+    console.log(messageArray);
     setMessages(messageArray);
   }
 
@@ -179,13 +192,15 @@ function AgentChat(props) {
 function Message(props) {
   let msg = props.messageObj;
   return (
-    <div
-      className={`max-w-[80%] w-fit p-1.5 m-0.5 border bg ${
-        msg.senderType === "agent" ? "bg-[#1CFEBA]" : "bg-white"
-      }  ${msg.senderType === "agent" ? "bg-[#1CFEBA] self-end" : "bg-white"}`}
-    >
-      {" "}
-      {msg.message}{" "}
+    <div className={`flex flex-col  max-w-[80%] ${msg.senderType === "agent" ? "self-end items-end" : ""}`}>
+      <div className="text-[0.7rem] text-gray-500">{msg.name}</div>
+      <div
+        className={`w-fit px-2 py-1 m-0.5 border bg ${msg.senderType === "agent" ? "bg-[#1CFEBA]" : "bg-white"}  ${
+          msg.senderType === "agent" ? "bg-[#1CFEBA]" : "bg-white"
+        }`}
+      >
+        {msg.message}
+      </div>
     </div>
   );
 }
@@ -193,16 +208,38 @@ function Message(props) {
 function ChatTile(props) {
   let chat = props.chatObj;
   return (
-    <button
+    <a
+      href="#"
       onClick={() => {
         props.setCurrentChatId(chat.id);
       }}
-      className="w-full border flex flex-row p-4"
+      className="w-full border flex flex-row p-4 space-x-1"
     >
-      <div className="grow text-left">{chat.id}</div>
-      <div className="border-2 rounded-md px-2">{chat.priority}</div>
-      <div></div>
-    </button>
+      <div className="grow text-left font-bold">{chat.name}</div>
+      {chat.priority !== undefined && (
+        <div
+          className={`${
+            chat.priority === "low"
+              ? "border-amber-200"
+              : chat.priority === "medium"
+              ? "border-orange-500"
+              : "border-red-500"
+          } border-2 rounded-md px-2`}
+        >
+          {chat.priority}
+        </div>
+      )}
+      {(!chat.assigned || chat.assignedTo !== props.user.id) && (
+        <button
+          className="border-green-500 border-2 rounded px-2 bg-green-300"
+          onClick={async () => {
+            updateChatById(chat.id, true, true, props.user.id, chat.priority);
+          }}
+        >
+          Assign to Self
+        </button>
+      )}
+    </a>
   );
 }
 
