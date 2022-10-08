@@ -27,19 +27,3 @@ function App() {
 }
 
 export default App;
-
-//   (
-//     <div>
-//       {JSON.stringify(user)}
-//       <button
-//         onClick={() => {
-//           setUser({});
-//           setUserType("");
-//           window.sessionStorage.setItem("user", JSON.stringify({}));
-//           window.sessionStorage.setItem("userType", "");
-//         }}
-//       >
-//         logout
-//       </button>
-//     </div>
-//   )

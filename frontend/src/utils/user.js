@@ -1,8 +1,10 @@
 import axios from "axios";
+var API_URL = import.meta.env.VITE_API_URL;
+console.log("API_URL", API_URL);
 
 export const getUserById = async (id) => {
   try {
-    const response = await axios.get("http://127.0.0.1:5000/users/" + id);
+    const response = await axios.get(API_URL+"/users/" + id);
     console.log("response  ", response);
     return response.data || {};
   } catch (error) {
@@ -12,7 +14,7 @@ export const getUserById = async (id) => {
 
 export const getAllUsers = async () => {
   try {
-    const response = await axios.get("http://127.0.0.1:5000/users/");
+    const response = await axios.get(API_URL+"/users/");
     console.log("response  ", response);
     return response.data;
   } catch (error) {
