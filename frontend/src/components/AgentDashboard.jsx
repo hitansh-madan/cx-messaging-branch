@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { sendMessage, getAllMessagesById, getAllChats, updateChatById } from "../utils/chat";
+import { getSearch } from "../utils/search";
 import io from "socket.io-client";
 
 var API_URL = import.meta.env.VITE_API_URL;
@@ -11,7 +12,6 @@ function AgentDashboard(props) {
   return (
     <div className="flex flex-row px-24 py-6 space-x-2">
       <AgentChatList
-        className="grow"
         currentChatId={currentChatId}
         setCurrentChatId={setCurrentChatId}
         user={props.user}
@@ -20,7 +20,6 @@ function AgentDashboard(props) {
         setUserType={props.setUserType}
       />
       <AgentChat
-        className="grow"
         currentChatId={currentChatId}
         setCurrentChatId={setCurrentChatId}
         user={props.user}
@@ -28,6 +27,7 @@ function AgentDashboard(props) {
         setUser={props.setUser}
         setUserType={props.setUserType}
       />
+      <AgentAddons currentChatId={currentChatId} setCurrentChatId={setCurrentChatId} />
     </div>
   );
 }
@@ -112,9 +112,46 @@ function AgentChatList(props) {
               })}
           </div>
         </div>
-        {/* ------------------------------------------------------------------------------- */}
       </div>
     </div>
+  );
+}
+
+function ChatTile(props) {
+  let chat = props.chatObj;
+  return (
+    <a
+      href="#"
+      onClick={() => {
+        props.setCurrentChatId(chat.id);
+      }}
+      className="w-full border flex flex-row p-4 space-x-1"
+    >
+      <div className="grow text-left font-bold">{chat.name}</div>
+      {chat.priority !== undefined && (
+        <div
+          className={`${
+            chat.priority === "low"
+              ? "border-amber-200"
+              : chat.priority === "medium"
+              ? "border-orange-500"
+              : "border-red-500"
+          } border-2 rounded-md px-2`}
+        >
+          {chat.priority}
+        </div>
+      )}
+      {(!chat.assigned || chat.assignedTo !== props.user.id) && (
+        <button
+          className="border-green-500 border-2 rounded px-2 bg-green-300"
+          onClick={async () => {
+            updateChatById(chat.id, true, true, props.user.id, chat.priority);
+          }}
+        >
+          Assign to Self
+        </button>
+      )}
+    </a>
   );
 }
 
@@ -158,8 +195,8 @@ function AgentChat(props) {
   }
 
   return (
-    props.currentChatId === "" || (
-      <div className="h-[90vh] grow w-1/3 ">
+    <div className="h-[90vh] grow w-1/3 ">
+      {props.currentChatId === "" || (
         <div className="mx-auto h-full my-3 flex flex-col border-2 bg-white text-black shadow-xl">
           <div className="px-8 pt-6 h-18 flex flex-row justify-between">
             <div className="flex flex-row justify-start">
@@ -212,8 +249,8 @@ function AgentChat(props) {
             </button>
           </div>
         </div>
-      </div>
-    )
+      )}
+    </div>
   );
 }
 
@@ -233,40 +270,89 @@ function Message(props) {
   );
 }
 
-function ChatTile(props) {
-  let chat = props.chatObj;
+function AgentAddons(props) {
+  return (
+    <div className="h-[90vh] grow w-1/3 ">
+      <div className="mx-auto h-full my-3 flex flex-col border-2 bg-white text-black shadow-xl">
+        <AgentSearch currentChatId={props.currentChatId} setCurrentChatId={props.setCurrentChatId} />
+      </div>
+    </div>
+  );
+}
+
+function AgentSearch(props) {
+  const [searchKey, setSearchKey] = useState("");
+  const [searchResultMessages, setSearchResultMessages] = useState([]);
+  const [searchResultChats, setSearchResultChats] = useState([]);
+
+  return (
+    <div>
+      <div className="h-20 px-4 py-4 flex flex-row">
+        <input
+          className="grow w-[80%] px-2 mr-2 border"
+          type="text"
+          value={searchKey}
+          onChange={(e) => {
+            setSearchKey(e.target.value);
+          }}
+        />
+        <button
+          className="h-12 px-5 border bg-[#1CFEBA] font-sans font-bold"
+          onClick={async () => {
+            getSearch(searchKey).then((res) => {
+              setSearchResultChats(res.chats);
+              setSearchResultMessages(res.messages);
+            });
+          }}
+        >
+          Search
+        </button>
+      </div>
+      {(searchResultChats.length > 0 || searchResultMessages.length > 0) && (
+        <div className="italic font-bold px-4">Results</div>
+      )}
+
+      <div className=" p-4 flex flex-col-reverse content-end overflow-auto">
+        {searchResultMessages.length === 0 ||
+          searchResultMessages.map((resultObj, index) => {
+            return (
+              <SearchTile
+                key={index}
+                type="message"
+                currentChatId={props.currentChatId}
+                setCurrentChatId={props.setCurrentChatId}
+                resultObj={resultObj}
+              />
+            );
+          })}
+        {searchResultChats.length === 0 ||
+          searchResultChats.map((resultObj, index) => {
+            return (
+              <SearchTile
+                key={index}
+                currentChatId={props.currentChatId}
+                setCurrentChatId={props.setCurrentChatId}
+                type="chat"
+                resultObj={resultObj}
+              />
+            );
+          })}
+      </div>
+    </div>
+  );
+}
+
+function SearchTile(props) {
   return (
     <a
       href="#"
       onClick={() => {
-        props.setCurrentChatId(chat.id);
+        props.setCurrentChatId(props.resultObj.id || props.resultObj.chatId);
       }}
-      className="w-full border flex flex-row p-4 space-x-1"
+      className="w-full border flex flex-col p-4 space-x-1"
     >
-      <div className="grow text-left font-bold">{chat.name}</div>
-      {chat.priority !== undefined && (
-        <div
-          className={`${
-            chat.priority === "low"
-              ? "border-amber-200"
-              : chat.priority === "medium"
-              ? "border-orange-500"
-              : "border-red-500"
-          } border-2 rounded-md px-2`}
-        >
-          {chat.priority}
-        </div>
-      )}
-      {(!chat.assigned || chat.assignedTo !== props.user.id) && (
-        <button
-          className="border-green-500 border-2 rounded px-2 bg-green-300"
-          onClick={async () => {
-            updateChatById(chat.id, true, true, props.user.id, chat.priority);
-          }}
-        >
-          Assign to Self
-        </button>
-      )}
+      <div className="grow text-left font-bold">{props.resultObj.name}</div>
+      {props.type === "message" && <div>{props.resultObj.message}</div>}
     </a>
   );
 }

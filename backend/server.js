@@ -27,10 +27,12 @@ const io = require("socket.io")(server, {
 const usersRouter = require("./routes/users");
 const chatsRouter = require("./routes/chats")(io);
 const agentsRouter = require("./routes/agents");
+const searchRouter = require("./routes/search");
 
 app.use("/users", usersRouter);
 app.use("/chats", chatsRouter);
 app.use("/agents", agentsRouter);
+app.use("/search", searchRouter);
 
 io.on("connection", (socket) => {
   console.log("connected socket");
