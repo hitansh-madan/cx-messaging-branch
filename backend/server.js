@@ -13,17 +13,38 @@ app.use(express.json());
 mongoose.connect(uri, { useNewUrlParser: true });
 const connection = mongoose.connection;
 connection.once("open", () => {
-    console.log("MongoDB connection established successfully");
+  console.log("MongoDB connection established successfully");
+});
+
+const server = app.listen(port, () => {
+  console.log(`server running on ${port}`);
+});
+
+const io = require("socket.io")(server, {
+  cors: process.env.DEPLOYED_URL || "127.0.0.1",
 });
 
 const usersRouter = require("./routes/users");
-const chatsRouter = require("./routes/chats");
+const chatsRouter = require("./routes/chats")(io);
 const agentsRouter = require("./routes/agents");
 
 app.use("/users", usersRouter);
 app.use("/chats", chatsRouter);
 app.use("/agents", agentsRouter);
 
-app.listen(port, () => {
-    console.log(`server running on ${port}`);
+io.on("connection", (socket) => {
+  console.log("connected socket");
+
+  socket.on("join_chat", async (chatId) => {
+    await socket.join(chatId);
+    console.log("joined " + chatId);
+  });
+
+  socket.on("change_chat", async (chatId) => {
+    (await socket.rooms).forEach((room) => {
+      socket.leave(room);
+    });
+    await socket.join(chatId);
+    console.log(socket.rooms);
+  });
 });

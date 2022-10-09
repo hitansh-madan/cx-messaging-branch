@@ -1,13 +1,36 @@
 import { useEffect, useState } from "react";
 import { sendMessage, getAllMessagesById } from "../utils/chat";
+import io from "socket.io-client";
+
+var API_URL = import.meta.env.VITE_API_URL;
+var socket;
 
 function UserChat(props) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [receivedMessage, setReceivedMessage] = useState("");
 
   useEffect(() => {
     getMessages();
+    socketIO();
   }, []);
+
+  async function socketIO() {
+    socket = io(API_URL);
+    socket.on("connect", () => {
+      console.log("socket connected", socket.id);
+    });
+
+    socket.emit("join_chat", props.user.id);
+
+    socket.on("new_message", (message) => {
+      setReceivedMessage(message);
+    });
+  }
+
+  useEffect(() => {
+    setMessages([...messages, receivedMessage]);
+  }, [receivedMessage]);
 
   async function getMessages() {
     var messageArray = await getAllMessagesById(props.user.id);
@@ -40,9 +63,12 @@ function UserChat(props) {
         {/* --------------------------------------  ---------------------------------  */}
         <div className="grow px-4 pt-4 overflow-auto">
           <div className=" h-full bg-slate-100 p-4 flex flex-col-reverse overflow-auto">
-            {(messages.slice(0).reverse()).map((messageObj, index) => {
-              return <Message key={index} messageObj={messageObj} />;
-            })}
+            {messages
+              .slice(0)
+              .reverse()
+              .map((messageObj, index) => {
+                return <Message key={index} messageObj={messageObj} />;
+              })}
           </div>
         </div>
         {/* ------------------------------------------------------------------------------- */}

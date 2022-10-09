@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { sendMessage, getAllMessagesById, getAllChats, updateChatById } from "../utils/chat";
+import io from "socket.io-client";
+
+var API_URL = import.meta.env.VITE_API_URL;
+var socket;
 
 function AgentDashboard(props) {
   const [currentChatId, setCurrentChatId] = useState("");
@@ -117,10 +121,34 @@ function AgentChatList(props) {
 function AgentChat(props) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [receivedMessage, setReceivedMessage] = useState("");
+
+  useEffect(() => {
+    socketIO();
+  }, []);
 
   useEffect(() => {
     getMessages();
+    changeChat();
   }, [props]);
+
+  async function socketIO() {
+    socket = io(API_URL);
+    socket.on("connect", () => {
+      console.log("socket connected", socket.id);
+    });
+    socket.on("new_message", (message) => {
+      setReceivedMessage(message);
+    });
+  }
+
+  function changeChat() {
+    if (socket) socket.emit("change_chat", props.currentChatId);
+  }
+
+  useEffect(() => {
+    setMessages([...messages, receivedMessage]);
+  }, [receivedMessage]);
 
   async function getMessages() {
     console.log(props.currentChatId);
