@@ -31,17 +31,17 @@ export const getAllMessagesById = async (id) => {
   }
 };
 
-export const sendMessage = async (senderType, senderId, chatId, message) => {
+export const sendMessage = async (senderType, senderId, name, chatId, message) => {
   try {
-    const response = await axios
+    axios
       .post(API_URL + "/chats/" + chatId + "/messages", {
         senderType: senderType,
         senderId: senderId,
+        name: name,
         chatId: chatId,
         message: message,
       })
       .then(function (response) {
-        return response.data;
         console.log(response);
         return response.data;
       })
@@ -52,6 +52,7 @@ export const sendMessage = async (senderType, senderId, chatId, message) => {
     console.log(error);
   }
 };
+
 export const updateChatById = async (id, active, assigned, assignedTo, priority) => {
   try {
     const reqObj = {
