@@ -8,7 +8,7 @@ router.route("/").get(async (req, res) => {
       [
         {
           $search: {
-            index: "default",
+            index: "messages",
             text: {
               query: `${req.query.q}`,
               path: {

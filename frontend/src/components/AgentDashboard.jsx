@@ -221,6 +221,7 @@ function AgentChat(props) {
           <div className="grow px-4 pt-4 overflow-auto">
             <div className=" h-full bg-slate-100 p-4 flex flex-col-reverse content-end overflow-auto">
               {messages === undefined ||
+                messages === null ||
                 messages
                   .slice(0)
                   .reverse()
@@ -270,6 +271,8 @@ function Message(props) {
   );
 }
 
+// ----------------------------------------------------------------------------------
+
 function AgentAddons(props) {
   return (
     <div className="h-[90vh] grow w-1/3 ">
@@ -286,7 +289,7 @@ function AgentSearch(props) {
   const [searchResultChats, setSearchResultChats] = useState([]);
 
   return (
-    <div>
+    <div className="h-full">
       <div className="h-20 px-4 py-4 flex flex-row">
         <input
           className="grow w-[80%] px-2 mr-2 border"
@@ -311,8 +314,7 @@ function AgentSearch(props) {
       {(searchResultChats.length > 0 || searchResultMessages.length > 0) && (
         <div className="italic font-bold px-4">Results</div>
       )}
-
-      <div className=" p-4 flex flex-col-reverse content-end overflow-auto">
+      <div className="px-4 pt-4 h-3/5 overflow-auto">
         {searchResultMessages.length === 0 ||
           searchResultMessages.map((resultObj, index) => {
             return (
@@ -352,7 +354,7 @@ function SearchTile(props) {
       className="w-full border flex flex-col p-4 space-x-1"
     >
       <div className="grow text-left font-bold">{props.resultObj.name}</div>
-      {props.type === "message" && <div>{props.resultObj.message}</div>}
+      {props.type === "message" && <div className="whitespace-nowrap overflow-x-clip">{props.resultObj.message}</div>}
     </a>
   );
 }
