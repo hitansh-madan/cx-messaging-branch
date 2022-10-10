@@ -83,7 +83,7 @@ function UserChat(props) {
             className="h-12 px-5 border bg-[#1CFEBA] font-sans font-bold"
             onClick={() => {
               console.log(newMessage);
-              sendMessage(props.userType, props.user.id, props.user.id, newMessage);
+              sendMessage(props.userType, props.user.id, props.user.name, props.user.id, newMessage);
               setNewMessage("");
             }}
           >

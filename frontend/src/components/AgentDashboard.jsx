@@ -241,7 +241,7 @@ function AgentChat(props) {
               className="h-12 px-5 border bg-[#1CFEBA] font-sans font-bold"
               onClick={() => {
                 console.log(newMessage);
-                sendMessage(props.userType, props.user.id, props.currentChatId, newMessage);
+                sendMessage(props.userType, props.user.id, props.user.name, props.currentChatId, newMessage);
                 setNewMessage("");
               }}
             >

@@ -42,10 +42,11 @@ const chatsRouter = (io) => {
   router.route("/:id/messages").post((req, res) => {
     const senderType = req.body.senderType;
     const senderId = req.body.senderId;
+    const name = req.body.name;
     const chatId = req.params.id;
     const message = req.body.message;
 
-    const newMessage = new Message({ senderType, senderId, chatId, message });
+    const newMessage = new Message({ senderType, name, senderId, chatId, message });
 
     newMessage
       .save()

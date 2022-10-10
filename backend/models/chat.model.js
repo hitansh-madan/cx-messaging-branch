@@ -3,6 +3,8 @@ const { Schema, default: mongoose } = require("mongoose");
 const chatSchema = new Schema(
     {
         id: { type: Number, required: true, unique: true, trim: true },
+        name: { type: String, required: true, trim: true },
+
         active: { type: Boolean, required: true },
         assigned: {
             type: Boolean,

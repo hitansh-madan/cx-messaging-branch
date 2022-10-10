@@ -23,7 +23,7 @@ router.route("/add").post((req, res) => {
     newUser
         .save()
         .then(() => {
-            const newChat = new Chat({ id, active: false });
+            const newChat = new Chat({ id, name, active: false });
             newChat
                 .save()
                 .catch((err) => res.status(400).json("Error: " + err));
